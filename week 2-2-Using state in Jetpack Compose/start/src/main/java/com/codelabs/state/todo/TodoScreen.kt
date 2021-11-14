@@ -45,7 +45,27 @@ fun TodoItemInlineEditor(
     icon = item.icon,
     onIconChange = { onEditItemChange(item.copy(icon = it)) },
     submit = onEditDone,
-    iconsVisible = true
+    iconsVisible = true,
+    buttonSlot = {
+        Row {
+            val shrinkButtons = Modifier.widthIn(20.dp)
+            TextButton(onClick = onEditDone, modifier = shrinkButtons) {
+                Text(
+                    text = "\uD83D\uDCBE", // floppy disk
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(30.dp)
+                )
+            }
+            TextButton(onClick = onRemoveItem, modifier = shrinkButtons) {
+                Text(
+                    text = "❌",
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(30.dp)
+                )
+            }
+        }
+
+    }
 )
 
 @Composable
@@ -66,7 +86,9 @@ fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
         onIconChange = setIcon,
         submit = submit,
         iconsVisible = iconsVisible
-    )
+    ) {
+        TodoEditButton(onClick = submit, text = "Add", enabled = text.isNotBlank())
+    }
 }
 
 @Composable
@@ -76,7 +98,8 @@ private fun TodoItemInput(
     icon: TodoIcon,
     onIconChange: (TodoIcon) -> Unit,
     submit: () -> Unit,
-    iconsVisible: Boolean
+    iconsVisible: Boolean,
+    buttonSlot: @Composable () -> Unit
 ) {
     Column {
         Row(
@@ -85,26 +108,19 @@ private fun TodoItemInput(
                 .padding(top = 16.dp)
         ) {
             TodoInputText(
-                text = text,
-                onTextChange = onTextChange,
-                modifier = Modifier
+                text,
+                onTextChange,
+                Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
-                onImeAction = submit
+                submit
             )
-            TodoEditButton(
-                onClick = submit,
-                text = "Add",
-                modifier = Modifier.align(Alignment.CenterVertically),
-                enabled = text.isNotBlank()
-            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(Modifier.align(Alignment.CenterVertically)) { buttonSlot() }
         }
         if (iconsVisible) {
-            AnimatedIconRow(
-                icon = icon,
-                onIconChange = onIconChange,
-                Modifier.padding(top = 8.dp)
-            )
+            AnimatedIconRow(icon, onIconChange, Modifier.padding(top = 8.dp))
         } else {
             Spacer(modifier = Modifier.height(16.dp))
         }
